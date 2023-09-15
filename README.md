@@ -11,6 +11,11 @@ Also generally, object composed of multiple materials must be set to a single ma
 
 The material set list is on the left, and when selected, the material list for the selected item can be edited in the right pane.
 These info are saved within object. Pressing the Apply button will update the object's material slots by selected material set.
+
+- Simultaneously change mode.
+  
+When applying a material set, you can change to a specified mode.
+
 - Editable Category(Tab) name.
   
 Can edit any category name from Preference settings.
