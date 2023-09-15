@@ -36,12 +36,26 @@ class MSS_PropGroupData(bpy.types.PropertyGroup):
     
 class MSS_PropGroupSetDataList(bpy.types.PropertyGroup):
     dataList: bpy.props.CollectionProperty(type=MSS_PropGroupData)
-    def FillByDefaultMaterialSlot(self, obj):
+    mode: bpy.props.EnumProperty(
+        items=(
+            ("None", "None", ""),
+            ("OBJECT", "OBJECT", ""),
+            ("EDIT", "EDIT", ""),
+            ("SCULPT", "SCULPT", ""),
+            ("TEXTURE_PAINT", "TEXTURE_PAINT", ""),
+        ),
+        name="ChangeMode",
+        default="None",
+    )
+    def fill_by_current_material_slot(self, obj):
         self.name = "default"
         self.dataList.clear()
         for i in obj.material_slots:
             data = self.dataList.add()
             data.name = i.name
+    def change_mode(self):
+        if self.mode != "None":
+            bpy.ops.object.mode_set(mode=self.mode)
 
 class MSS_OT_ApplyMaterialSlot(bpy.types.Operator):
     bl_idname = "mss.apply_mat_slot"
@@ -54,6 +68,7 @@ class MSS_OT_ApplyMaterialSlot(bpy.types.Operator):
         for i in data_list:
             mat = bpy.data.materials.get(i.name)
             obj.data.materials.append(mat)
+        obj.mss_set_list[obj.mss_list_active_idx].change_mode()
         return {'FINISHED'}
 
 class MSS_OT_SlotListSideMenu(bpy.types.Operator):
@@ -79,7 +94,7 @@ class MSS_OT_SlotListSideMenu(bpy.types.Operator):
                 print(i.name)
                 if len(i.dataList) == 0:
                     i.name = "default"
-                    i.FillByDefaultMaterialSlot(obj)
+                    i.fill_by_current_material_slot(obj)
         return {'FINISHED'}
 
 class MSS_OT_SetListSideMenu(bpy.types.Operator):
@@ -92,7 +107,7 @@ class MSS_OT_SetListSideMenu(bpy.types.Operator):
         data_list = obj.mss_set_list
         if self.optionId == "add":
             data = data_list.add()
-            data.FillByDefaultMaterialSlot(obj)
+            data.fill_by_current_material_slot(obj)
             obj.mss_list_active_idx = len(data_list) - 1
         elif self.optionId == "remove":
             data = data_list.remove(obj.mss_list_active_idx)
@@ -151,7 +166,9 @@ class MSS_PT_Panel(bpy.types.Panel):
         col.operator(MSS_OT_SetListSideMenu.bl_idname, icon='TRIA_DOWN', text="").optionId = "down"
         # print("mss_set_list size is", len(obj.mss_set_list))
         if 0 < len(obj.mss_set_list):
-            row.template_list("MSS_UL_SlotList", "", obj.mss_set_list[obj.mss_list_active_idx], "dataList", obj, "mss_data_active_idx")
+            col = row.column()
+            col.template_list("MSS_UL_SlotList", "", obj.mss_set_list[obj.mss_list_active_idx], "dataList", obj, "mss_data_active_idx")
+            col.prop(obj.mss_set_list[obj.mss_list_active_idx], "mode")
             col = row.column()
             col.operator(MSS_OT_SlotListSideMenu.bl_idname, icon='ADD', text="").optionId = "add"
             col.operator(MSS_OT_SlotListSideMenu.bl_idname, icon='REMOVE', text="").optionId = "remove"
