@@ -1,5 +1,5 @@
 # Blender_MaterialSetSwitcher
-Quickly switch material sets.
+Feature that quickly switchable material set with list pane.
 
 # Background
 In my production environment, when performing normal baking using MultiResolution, I need to switch to a material for bake before baking process.
