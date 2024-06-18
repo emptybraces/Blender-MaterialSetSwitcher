@@ -1,4 +1,4 @@
-# Blender_MaterialSetSwitcher
+# Blender Material Set Switcher
 Feature that quickly switchable material set with list pane.
 
 # Background
